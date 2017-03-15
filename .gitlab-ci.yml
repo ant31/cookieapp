@@ -1,0 +1,100 @@
+---
+stages:
+  - tests
+  - builds
+  - deploy
+
+variables:
+  VERSION: "0.10.0"
+  DOMAIN: "devtable.com"
+  HELM_HOME: /root/.helm
+
+unit-test:
+  image: python:2.7
+  stage: tests
+  script:
+    - ./test.sh
+  tags:
+    - tectonic-runner
+
+build-chart:
+  stage: builds
+  before_script:
+    - export PATH="$PATH:/opt/bin"
+    - cd chart/cookieapp
+    - "sed -ri \"s/version: ${VERSION}/version: ${VERSION}-${CI_COMMIT_SHA:0:8}/g\" Chart.yaml"
+    - cat Chart.yaml
+  script:
+    - helm registry login -u "$QUAY_LOGIN" -p "$QUAY_PASS" quay.io
+    - helm registry push --namespace ant31 quay.io
+  tags:
+    - tectonic-runner
+
+build-image:
+  stage: builds
+  image: docker
+  script:
+    - docker login -u="$QUAY_LOGIN" -p="$QUAY_PASS" quay.io
+    - docker build --no-cache -t quay.io/ant31/cookieapp-image:${CI_COMMIT_SHA:0:8} .
+    - docker push quay.io/ant31/cookieapp-image:${CI_COMMIT_SHA:0:8}
+  tags:
+    - tectonic-runner
+
+
+deploy_preview:
+  stage: deploy
+  before_script:
+    - export PATH="$PATH:/opt/bin"
+    - echo "Deploy ${VERSION}-${CI_COMMIT_SHA:0:8}"
+    - export SUBDOMAIN="${CI_COMMIT_SHA:0:8}.cookie"
+  script:
+    - >
+      helm registry upgrade quay.io/ant31/cookieapp@${VERSION}-${CI_COMMIT_SHA:0:8} --
+      cookieapp-dev-${CI_COMMIT_SHA:0:8}
+      --install
+      --set tag=${CI_COMMIT_SHA:0:8},subdomain=${SUBDOMAIN},domain=${DOMAIN}
+  environment:
+    name: review/$CI_COMMIT_SHA
+    url: "https://${CI_COMMIT_SHA:0:8}.cookie.${DOMAIN}"
+    on_stop: stop_preview
+  tags:
+    - tectonic-runner
+  except:
+    - tags
+    - master
+
+stop_preview:
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - echo "Delete cookieapp ${VERSION}-${CI_COMMIT_SHA:0:8} env"
+    - helm delete cookieapp-dev-${CI_COMMIT_SHA:0:8}
+  when: manual
+  environment:
+    name: review/$CI_COMMIT_SHA
+    action: stop
+  except:
+    - tags
+    - master
+
+deploy-prod:
+  stage: deploy
+  before_script:
+    - export PATH="$PATH:/opt/bin"
+  script:
+    - echo "Deploy ${VERSION}-${CI_COMMIT_SHA:0:8} to production"
+    - export SUBDOMAIN="cookieapp"
+    - helm registry upgrade quay.io/ant31/cookieapp@${VERSION}-${CI_COMMIT_SHA:0:8} --
+      cookieapp-prod
+      --install
+      --set tag=${CI_COMMIT_SHA:0:8},subdomain=${SUBDOMAIN},domain=${DOMAIN}
+  environment:
+    name: prod
+    url: "https://cookieapp.${DOMAIN}.com"
+  when: manual
+  only:
+    - tags
+    - master
+  tags:
+    - tectonic-runner
