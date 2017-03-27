@@ -23,4 +23,4 @@ script:
   - appr push --namespace ant31 staging.quay.io -f
 
 after_success:
-  - curl $APPR_BACKEND_SERVICE/api/v1/upgrade -d '{"package": "staging.quay.io/ant31/cookieapp", "helm_opts": ["--install", "cookie1"]}'
+  - "curl $APPR_BACKEND_SERVICE/api/v1/upgrade -d '{\"package\": \"staging.quay.io/ant31/cookieapp\", \"helm_opts\": [\"--install\", \"cookie1\"]}'"
