@@ -9,7 +9,7 @@ spec:
   # TLS secret will be created by kube-lego.
   tls:
   - hosts:
-    - cookieapp-{{ .Chart.Version | replace }}.kubespray.com
+    - cookieapp-{{ .Chart.Version | replace "." "-"}}.kubespray.com
     secretName: cookieapp-{{ .Chart.Version }}
   rules:
   - host: cookieapp-{{ .Chart.Version | replace "." "-" }}.kubespray.com
