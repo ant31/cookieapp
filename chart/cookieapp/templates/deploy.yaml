@@ -9,16 +9,14 @@ metadata:
   name: cookieapp
   labels:
     app: cookieapp
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
         app: cookieapp
-        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
     spec:
@@ -28,15 +26,3 @@ spec:
           ports:
             - name: http
               containerPort: 80
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: 30
-            timeoutSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: 5
-            timeoutSeconds: 1

@@ -9,10 +9,18 @@ spec:
   # TLS secret will be created by kube-lego.
   tls:
   - hosts:
-    - cookieapp-{{ .Chart.Version }}.failfast-ci.io
+    - cookieapp-{{ .Chart.Version | replace "." "-"}}.kubespray.com
+    - cookieapp.kubespray.com
     secretName: cookieapp-{{ .Chart.Version }}
   rules:
-  - host: cookieapp-{{ .Chart.Version }}.failfast-ci.io
+  - host: cookieapp-{{ .Chart.Version | replace "." "-" }}.kubespray.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cookieapp
+          servicePort: 80
+  - host: cookieapp.kubespray.com
     http:
       paths:
       - path: /
