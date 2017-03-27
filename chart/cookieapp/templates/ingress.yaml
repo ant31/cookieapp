@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: cookieapp
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/tls-acme: "true"
+spec:
+  # TLS secret will be created by kube-lego.
+  tls:
+  - hosts:
+    - cookieapp-{{ .Chart.Version }}.failfast-ci.io
+    secretName: cookieapp-{{ .Chart.Version }}
+  rules:
+  - host: cookieapp-{{ .Chart.Version }}.failfast-ci.io
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: cookieapp
+          servicePort: 80
