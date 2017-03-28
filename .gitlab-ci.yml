@@ -2,6 +2,7 @@
 stages:
   - tests
   - builds
+  - deploy
 
 unit-test:
   stage: tests
