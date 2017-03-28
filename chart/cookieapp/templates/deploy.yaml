@@ -9,7 +9,6 @@ metadata:
   name: cookieapp
   labels:
     app: cookieapp
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
@@ -18,7 +17,6 @@ spec:
     metadata:
       labels:
         app: cookieapp
-        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
     spec:
