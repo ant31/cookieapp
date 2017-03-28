@@ -11,6 +11,7 @@ before_install:
   - curl https://github.com/app-registry/appr-cli/releases/download/v0.3.7-dev/cnr-v0.3.7-dev-linux-x64 -L -o appr
   - chmod +x appr
   - "sed -ri \"s/version: 0.0.2/version: $TRAVIS_TAG/g\" chart/cookieapp/Chart.yaml"
+  - "sed -ri \"s/v0.0.2/v$TRAVIS_TAG/g\" index.html"
   - cat chart/cookieapp/Chart.yaml
   - appr login -u "$APPR_LOGIN" -p "$APPR_PASS" staging.quay.io
   - docker login --username "$APPR_LOGIN" --password "$APPR_PASS" quay.io
