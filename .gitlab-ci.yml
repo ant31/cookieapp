@@ -9,26 +9,28 @@ unit-test:
   script:
     - ./test.sh
   tags:
-    - shell
+    - ant31-builder
 
 build-chart:
   stage: builds
   variables:
     HELM_HOME: /srv/.helm
+    HELM: /srv/.helm/helm
 
   before_script:
     - "sed -ri \"s/version: 0.0.2/version: $CI_COMMIT_TAG/g\" chart/cookieapp/Chart.yaml"
     - cd chart/cookieapp
   script:
-    - helm registry login -u "$QUAY_LOGIN" -p "$QUAY_PASS" quay.io
-    - helm registry push --namespace ant31 -f quay.io
+    - $HELM registry login -u "$QUAY_LOGIN" -p "$QUAY_PASS" quay.io
+    - $HELM registry push --namespace ant31 -f quay.io
   tags:
-    - shell
+    - ant31-builder
   only:
     - tags
 
 build-image:
   stage: builds
+  image: docker
   only:
     - tags
   script:
@@ -36,7 +38,7 @@ build-image:
     - docker build --no-cache -t quay.io/ant31/cookieapp-image:$CI_COMMIT_TAG .
     - docker push quay.io/ant31/cookieapp-image:$CI_COMMIT_TAG
   tags:
-    - shell
+    - ant31-builder
 
 deploy-prod:
   stage: deploy
