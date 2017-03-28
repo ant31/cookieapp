@@ -3,10 +3,6 @@ stages:
   - tests
   - builds
 
-variables:
-  PATH: $PATH:$CI_PROJECT_DIR
-  APPR_VERSION: 0.3.8-dev
-
 
 unit-test:
   stage: tests
