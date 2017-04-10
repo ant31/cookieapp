@@ -52,7 +52,7 @@ deploy-preview:
   environment:
     name: review/$CI_COMMIT_REF_NAME
     url: "https://cookieapp-${CI_COMMIT_SHA:0:8}.kubespray.com"
-  on_stop: stop_preview
+    on_stop: stop_preview
   tags:
     - ant31-builder
 
