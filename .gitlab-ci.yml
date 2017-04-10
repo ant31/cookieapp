@@ -1,8 +1,11 @@
 ---
 stages:
-  - builds
   - tests
+  - builds
   - deploy
+
+variables:
+  VERSION: "0.9.1"
 
 unit-test:
   stage: tests
@@ -10,9 +13,6 @@ unit-test:
     - ./test.sh
   tags:
     - ant31-builder
-
-variables:
-  VERSION: "0.9.1"
 
 build-chart:
   stage: builds
@@ -41,15 +41,48 @@ build-image:
   tags:
     - ant31-builder
 
-deploy:
-  stage: deploy
+
+deploy-preview:
+  stage: deploy-preview
+  before_script:
+    - echo "Deploy ${VERSION}-${CI_COMMIT_SHA:0:8}"
+    - export SUBDOMAIN="cookieapp-${CI_COMMIT_SHA:0:8}"
   script:
-    - echo "Deploy to ${VERSION}-${CI_COMMIT_SHA:0:8}"
-    - export SUBDOMAIN="${CI_COMMIT_SHA:0:8}"
     - "curl -XPOST http://$APPR_BACKEND/api/v1/upgrade -d \"{\\\"package\\\": \\\"quay.io/ant31/cookieapp@${VERSION}-${CI_COMMIT_SHA:0:8}\\\",\\\"helm_opts\\\": [\\\"ckapp-${CI_COMMIT_SHA:0:8}\\\", \\\"--install\\\", \\\"--set\\\", \\\"tag=${CI_COMMIT_SHA:0:8},subdomain=${SUBDOMAIN}\\\"]}\""
   environment:
     name: review/$CI_COMMIT_REF_NAME
     url: "https://cookieapp-${CI_COMMIT_SHA:0:8}.kubespray.com"
+  on_stop: stop_preview
+  tags:
+    - ant31-builder
+
+stop_review:
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+  before_script:
+    - echo "Delete cookieapp ${VERSION}-${CI_COMMIT_SHA:0:8} env"
+    - export SUBDOMAIN="cookieapp-${CI_COMMIT_SHA:0:8}"
+  script:
+    - "curl -XPOST http://$APPR_BACKEND/api/v1/helm/delete -d \"{\\\"helm_opts\\\": [\\\"ckapp-${CI_COMMIT_SHA:0:8}\\\"]}\""
   when: manual
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    action: stop
+
+
+deploy-production:
+  stage: deploy-preview
+  script:
+    - echo "Deploy ${VERSION}-${CI_COMMIT_SHA:0:8} to production"
+    - export SUBDOMAIN="cookieapp"
+    - "curl -XPOST http://$APPR_BACKEND/api/v1/upgrade -d \"{\\\"package\\\": \\\"quay.io/ant31/cookieapp@${VERSION}-${CI_COMMIT_SHA:0:8}\\\",\\\"helm_opts\\\": [\\\"ckapp-${CI_COMMIT_SHA:0:8}\\\", \\\"--install\\\", \\\"--set\\\", \\\"tag=${CI_COMMIT_SHA:0:8},subdomain=${SUBDOMAIN}\\\"]}\""
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    url: "https://cookieapp.kubespray.com"
+  when: manual
+  only:
+    - tags
+    - master
   tags:
     - ant31-builder
