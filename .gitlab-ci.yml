@@ -11,22 +11,24 @@ unit-test:
   tags:
     - ant31-builder
 
+variables:
+  SHORT_SHA: ${CI_COMMIT_SHA:0:8}
+
 build-chart:
   stage: builds
   variables:
     HELM_HOME: /srv/.helm
     HELM: /srv/.helm/helm
-
   before_script:
-    - "sed -ri \"s/version: 0.0.2/version: $CI_COMMIT_TAG/g\" chart/cookieapp/Chart.yaml"
+    - echo $SHORT_SHA
     - cd chart/cookieapp
+    - "sed -ri \"s/version: (0.0.2)/version: \\\\1-${SHORT_SHA}/g\" chart/cookieapp/Chart.yaml"
   script:
     - $HELM registry login -u "$QUAY_LOGIN" -p "$QUAY_PASS" quay.io
-    - $HELM registry push --namespace ant31 -f quay.io
+    - $HELM registry push --namespace ant31 quay.io
+    # - $HELM registry push --namespace ant31  quay.io --channel stable
   tags:
     - ant31-builder
-  only:
-    - tags
 
 build-image:
   stage: builds
@@ -45,10 +47,9 @@ deploy-prod:
   script:
     - echo "Deploy to $CI_COMMIT_TAG to production server"
     - "curl -XPOST http://$APPR_BACKEND/api/v1/upgrade -d \"{\\\"package\\\": \\\"quay.io/ant31/cookieapp@$CI_COMMIT_TAG\\\",\\\"helm_opts\\\": [\\\"cookie1\\\", \\\"--install\\\"]}\""
-
   environment:
     name: prod
-    url: "https://cookieapp.kubespray.com"
+    url: "https://cookieapp-${SHORT_SHA}.kubespray.com"
   when: manual
   only:
     - tags

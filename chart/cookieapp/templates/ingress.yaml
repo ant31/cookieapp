@@ -1,7 +1,12 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: cookieapp
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
   annotations:
     kubernetes.io/ingress.class: "nginx"
     kubernetes.io/tls-acme: "true"
@@ -9,9 +14,8 @@ spec:
   # TLS secret will be created by kube-lego.
   tls:
   - hosts:
-    - cookieapp-{{ .Chart.Version | replace "." "-"}}.kubespray.com
-    - cookieapp.kubespray.com
-    secretName: cookieapp-{{ .Chart.Version }}
+    - {{ .Values.subdomain }}.kubespray.com
+    secretName: cookieapp-{{ .Values.subdomain }}
   rules:
   - host: cookieapp-{{ .Chart.Version | replace "." "-" }}.kubespray.com
     http:

@@ -1,14 +1,10 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: cookieapp
+  name: {{ template "fullname" . }}
   labels:
-    heritage: helm
-spec:
-metadata:
-  name: cookieapp
-  labels:
-    app: cookieapp
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
@@ -16,13 +12,11 @@ spec:
   template:
     metadata:
       labels:
-        app: cookieapp
-        release: "{{ .Release.Name }}"
-        heritage: "{{ .Release.Service }}"
+        app: {{ template "fullname" . }}
     spec:
       containers:
         - name: cookieapp
-          image: "quay.io/ant31/cookieapp-image:v{{ .Chart.Version }}"
+          image: "quay.io/ant31/cookieapp-image:{{ .Values.tag  }}"
           ports:
             - name: http
               containerPort: 80
