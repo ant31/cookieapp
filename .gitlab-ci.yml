@@ -20,9 +20,9 @@ build-chart:
     HELM_HOME: /srv/.helm
     HELM: /srv/.helm/helm
   before_script:
-    - echo $SHORT_SHA
+    - echo ${CI_COMMIT_SHA:0:8}
     - cd chart/cookieapp
-    - "sed -ri \"s/version: (0.0.2)/version: \\\\1-${SHORT_SHA}/g\" chart/cookieapp/Chart.yaml"
+    - "sed -ri \"s/version: (0.0.2)/version: \\\\1-${SHORT_SHA}/g\" Chart.yaml"
   script:
     - $HELM registry login -u "$QUAY_LOGIN" -p "$QUAY_PASS" quay.io
     - $HELM registry push --namespace ant31 quay.io
