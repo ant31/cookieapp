@@ -56,7 +56,7 @@ deploy-preview:
   tags:
     - ant31-builder
 
-stop_review:
+stop_preview:
   stage: deploy
   variables:
     GIT_STRATEGY: none
