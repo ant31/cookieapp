@@ -45,8 +45,8 @@ deploy:
   stage: deploy
   script:
     - echo "Deploy to ${VERSION}-${CI_COMMIT_SHA:0:8}"
-    - export SUBDOMAIN="${VERSION}-${CI_COMMIT_SHA:0:8}"
-    - "curl -XPOST http://$APPR_BACKEND/api/v1/upgrade -d \"{\\\"package\\\": \\\"quay.io/ant31/cookieapp@${VERSION}-${CI_COMMIT_SHA:0:8}\\\",\\\"helm_opts\\\": [\\\"ckapp-${VERSION}-${CI_COMMIT_SHA:0:8}\\\", \\\"--install\\\", \\\"--set\\\", \\\"tag=${CI_COMMIT_SHA:0:8},subdomain=${SUBDOMAIN}\\\"]}\""
+    - export SUBDOMAIN="${CI_COMMIT_SHA:0:8}"
+    - "curl -XPOST http://$APPR_BACKEND/api/v1/upgrade -d \"{\\\"package\\\": \\\"quay.io/ant31/cookieapp@${VERSION}-${CI_COMMIT_SHA:0:8}\\\",\\\"helm_opts\\\": [\\\"ckapp-${CI_COMMIT_SHA:0:8}\\\", \\\"--install\\\", \\\"--set\\\", \\\"tag=${CI_COMMIT_SHA:0:8},subdomain=${SUBDOMAIN}\\\"]}\""
   environment:
     name: review/$CI_COMMIT_REF_NAME
     url: "https://cookieapp-${CI_COMMIT_SHA:0:8}.kubespray.com"
