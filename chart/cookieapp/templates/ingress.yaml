@@ -14,20 +14,14 @@ spec:
   # TLS secret will be created by kube-lego.
   tls:
   - hosts:
-    - {{ .Values.subdomain }}.kubespray.com
+    - "{{ .Values.subdomain }}.kubespray.com"
     secretName: cookieapp-{{ .Values.subdomain }}
   rules:
-  - host: cookieapp-{{ .Chart.Version | replace "." "-" }}.kubespray.com
+  - host: "{{ .Values.subdomain }}.kubespray.com"
     http:
       paths:
       - path: /
         backend:
           serviceName: cookieapp
           servicePort: 80
-  - host: cookieapp.kubespray.com
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: cookieapp
-          servicePort: 80
+
