@@ -51,3 +51,5 @@ deploy:
     name: review/$CI_COMMIT_REF_NAME
     url: "https://cookieapp-${CI_COMMIT_SHA:0:8}.kubespray.com"
   when: manual
+  tags:
+    - ant31-builder
