@@ -43,7 +43,7 @@ build-image:
 
 
 deploy-preview:
-  stage: deploy-preview
+  stage: deploy
   before_script:
     - echo "Deploy ${VERSION}-${CI_COMMIT_SHA:0:8}"
     - export SUBDOMAIN="cookieapp-${CI_COMMIT_SHA:0:8}"
@@ -72,7 +72,7 @@ stop_review:
 
 
 deploy-production:
-  stage: deploy-preview
+  stage: deploy
   script:
     - echo "Deploy ${VERSION}-${CI_COMMIT_SHA:0:8} to production"
     - export SUBDOMAIN="cookieapp"
