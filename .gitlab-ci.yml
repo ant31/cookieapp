@@ -13,6 +13,7 @@ unit-test:
 
 variables:
   SHORT_SHA: ${CI_COMMIT_SHA:0:8}
+  VERSION: "0.0.2"
 
 build-chart:
   stage: builds
@@ -22,10 +23,11 @@ build-chart:
   before_script:
     - echo ${CI_COMMIT_SHA:0:8}
     - cd chart/cookieapp
-    - "sed -ri \"s/version: (0.0.2)/version: \\\\1-${SHORT_SHA}/g\" Chart.yaml"
+    - "sed -ri \"s/version: ${VERSION}/version: ${VERSION}-${CI_COMMIT_SHA:0:8}/g\" Chart.yaml"
+    - cat Chart.yaml
   script:
     - $HELM registry login -u "$QUAY_LOGIN" -p "$QUAY_PASS" quay.io
-    - $HELM registry push --namespace ant31 quay.io
+    # - $HELM registry push --namespace ant31 quay.io
     # - $HELM registry push --namespace ant31  quay.io --channel stable
   tags:
     - ant31-builder
@@ -37,19 +39,19 @@ build-image:
     - tags
   script:
     - docker login -u="$QUAY_LOGIN" -p="$QUAY_PASS" quay.io
-    - docker build --no-cache -t quay.io/ant31/cookieapp-image:$CI_COMMIT_TAG .
-    - docker push quay.io/ant31/cookieapp-image:$CI_COMMIT_TAG
+    - docker build --no-cache -t quay.io/ant31/cookieapp-image:${CI_COMMIT_TAG:0:8} .
+    - docker push quay.io/ant31/cookieapp-image:${CI_COMMIT_TAG:0:8}
   tags:
     - ant31-builder
 
-deploy-prod:
+deploy:
   stage: deploy
   script:
-    - echo "Deploy to $CI_COMMIT_TAG to production server"
-    - "curl -XPOST http://$APPR_BACKEND/api/v1/upgrade -d \"{\\\"package\\\": \\\"quay.io/ant31/cookieapp@$CI_COMMIT_TAG\\\",\\\"helm_opts\\\": [\\\"cookie1\\\", \\\"--install\\\"]}\""
+    - echo "Deploy to ${VERSION}-${CI_COMMIT_TAG:0:8} to production server"
+    - "curl -XPOST http://$APPR_BACKEND/api/v1/upgrade -d \"{\\\"package\\\": \\\"quay.io/ant31/cookieapp@${VERSION}-${CI_COMMIT_TAG:0:8}\\\",\\\"helm_opts\\\": [\\\"cookie1\\\", \\\"--install\\\"]}\""
   environment:
-    name: prod
-    url: "https://cookieapp-${SHORT_SHA}.kubespray.com"
+    name: review/$CI_COMMIT_REF_NAME
+    url: "https://cookieapp-${CI_COMMIT_TAG:0:8}.kubespray.com"
   when: manual
   only:
     - tags
