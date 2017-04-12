@@ -77,6 +77,8 @@ stop_preview:
   except:
     - tags
     - master
+  tags:
+    - tectonic-runner
 
 deploy-prod:
   stage: deploy
