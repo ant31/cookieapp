@@ -68,6 +68,7 @@ stop_preview:
   variables:
     GIT_STRATEGY: none
   script:
+    - export PATH="$PATH:/opt/bin"
     - echo "Delete cookieapp ${VERSION}-${CI_COMMIT_SHA:0:8} env"
     - helm delete cookieapp-dev-${CI_COMMIT_SHA:0:8}
   when: manual
