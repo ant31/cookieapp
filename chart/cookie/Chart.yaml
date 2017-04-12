@@ -1,4 +1,4 @@
-name: cookieapp
+name: cookie
 home: https://github.com/coreos/example-app
 version: 0.10.0
 description: A simple example container that shows a rolling update from v1.0 to v2.0. The logo should change between versions.
