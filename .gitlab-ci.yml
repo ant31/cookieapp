@@ -21,7 +21,7 @@ build-chart:
   stage: builds
   before_script:
     - export PATH="$PATH:/opt/bin"
-    - cd chart/cookieapp
+    - cd chart/cookie
     - "sed -ri \"s/version: ${VERSION}/version: ${VERSION}-${CI_COMMIT_SHA:0:8}/g\" Chart.yaml"
     - cat Chart.yaml
   script:
@@ -49,7 +49,7 @@ deploy_preview:
     - export SUBDOMAIN="${CI_COMMIT_SHA:0:8}.cookie"
   script:
     - >
-      helm registry upgrade quay.io/ant31/cookieapp@${VERSION}-${CI_COMMIT_SHA:0:8} --
+      helm registry upgrade quay.io/ant31/cookie@${VERSION}-${CI_COMMIT_SHA:0:8} --
       cookieapp-dev-${CI_COMMIT_SHA:0:8}
       --install
       --set tag=${CI_COMMIT_SHA:0:8},subdomain=${SUBDOMAIN},domain=${DOMAIN}
@@ -85,7 +85,7 @@ deploy-prod:
   script:
     - echo "Deploy ${VERSION}-${CI_COMMIT_SHA:0:8} to production"
     - export SUBDOMAIN="cookieapp"
-    - helm registry upgrade quay.io/ant31/cookieapp@${VERSION}-${CI_COMMIT_SHA:0:8} --
+    - helm registry upgrade quay.io/ant31/cookie@${VERSION}-${CI_COMMIT_SHA:0:8} --
       cookieapp-prod
       --install
       --set tag=${CI_COMMIT_SHA:0:8},subdomain=${SUBDOMAIN},domain=${DOMAIN}
